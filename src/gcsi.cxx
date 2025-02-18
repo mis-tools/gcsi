@@ -30,7 +30,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-using namespace std;
 using namespace boost;
 
 typedef float FloatPixelType;
@@ -230,13 +229,13 @@ unsigned int numberOfBitsPerVoxel = 0; // 8=>unsigned char, 32=>int
 unsigned int verboseOutput = 0; // 0=false, 1=true
 
 std::vector<unsigned int> labelsToDrop;
-map<int, string> graphCutCleaningSegments;
+std::map<int, std::string> graphCutCleaningSegments;
 
 std::string mrImageFilePath = "";
 std::string labelMapImageFilePath = "";
 std::string outputLabelMapImageFilePath = "";
-std::vector<string> foregroundFiles;
-std::vector<string> backgroundFiles;
+std::vector<std::string> foregroundFiles;
+std::vector<std::string> backgroundFiles;
 std::string contourPropabilisticMapFilename = "";
 std::string spBinaryROIMapFilename = "";
 
@@ -244,7 +243,7 @@ int process(int argc, char* argv[])
 {
   int iC;
   int iSegmentID;
-  string filename;
+  std::string filename;
   while ((iC = getopt(argc, argv, "G:N:V:B:I:O:L:U:C:a:s:l:c:p:f:b:t:d:n:")) != -1)
   {
     std::stringstream ss(optarg);
@@ -352,7 +351,7 @@ int process(int argc, char* argv[])
 
     std::cout << "graphCutCleaningSegments: [";
     first_itr = true;
-    map<int, string>::iterator it;
+    std::map<int, std::string>::iterator it;
     for (it = graphCutCleaningSegments.begin(); it != graphCutCleaningSegments.end(); it++)
     {
       if (!first_itr)
@@ -364,7 +363,7 @@ int process(int argc, char* argv[])
 
     std::cout << "foregroundFiles: [";
     first_itr = true;
-    for (std::vector<string>::iterator it = foregroundFiles.begin(); it != foregroundFiles.end(); ++it)
+    for (std::vector<std::string>::iterator it = foregroundFiles.begin(); it != foregroundFiles.end(); ++it)
     {
       if (!first_itr)
         std::cout << ",";
@@ -375,7 +374,7 @@ int process(int argc, char* argv[])
 
     std::cout << "backgroundFiles: [";
     first_itr = true;
-    for (std::vector<string>::iterator it = backgroundFiles.begin(); it != backgroundFiles.end(); ++it)
+    for (std::vector<std::string>::iterator it = backgroundFiles.begin(); it != backgroundFiles.end(); ++it)
     {
       if (!first_itr)
         std::cout << ",";
@@ -422,7 +421,7 @@ int GraphCutSegmentationImprover()
     reader1->Update();
     reader2->Update();
 
-    for (std::vector<string>::iterator it = foregroundFiles.begin(); it != foregroundFiles.end(); ++it)
+    for (std::vector<std::string>::iterator it = foregroundFiles.begin(); it != foregroundFiles.end(); ++it)
     {
       FloatReaderType::Pointer reader = FloatReaderType::New();
       reader->SetFileName(*it);
@@ -431,7 +430,7 @@ int GraphCutSegmentationImprover()
       foregroundImgs.push_back(foregroundImg);
     }
 
-    for (std::vector<string>::iterator it = backgroundFiles.begin(); it != backgroundFiles.end(); ++it)
+    for (std::vector<std::string>::iterator it = backgroundFiles.begin(); it != backgroundFiles.end(); ++it)
     {
       FloatReaderType::Pointer reader = FloatReaderType::New();
       reader->SetFileName(*it);
@@ -442,7 +441,7 @@ int GraphCutSegmentationImprover()
   }
   catch (itk::ExceptionObject& kExcp)
   {
-    cerr << kExcp << endl;
+    std::cerr << kExcp << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -469,7 +468,7 @@ int GraphCutSegmentationImprover()
     }
     catch (itk::ExceptionObject& exp)
     {
-      cout << exp << endl;
+      std::cout << exp << std::endl;
     }
   }
 
@@ -513,7 +512,7 @@ int GraphCutSegmentationImprover()
       }
       catch (itk::ExceptionObject& kExcp)
       {
-        cerr << kExcp << endl;
+        std::cerr << kExcp << std::endl;
         return EXIT_FAILURE;
       }
 
@@ -532,7 +531,7 @@ int GraphCutSegmentationImprover()
       bool useNarrowBandOptimization = fSegmentProbabilityTreshold > 0;
       if (useNarrowBandOptimization)
       {
-        cout << "using narrow band algorithm, with: " << fSegmentProbabilityTreshold << endl;
+        std::cout << "using narrow band algorithm, with: " << fSegmentProbabilityTreshold << std::endl;
         int iDilateRadius = 1;
         BinaryLabelImageType::Pointer spBinaryROIMap = ComputeBinaryInterestLabelMap(spSegmentPropImage, fSegmentProbabilityTreshold, iDilateRadius);
 
@@ -554,7 +553,7 @@ int GraphCutSegmentationImprover()
           }
           catch (itk::ExceptionObject& exp)
           {
-            cout << exp << endl;
+            std::cout << exp << std::endl;
           }
         }
 
@@ -563,13 +562,13 @@ int GraphCutSegmentationImprover()
         kSegmentBoundingBox = computeSegmentBoundingBox(imageIterator, iNumberOfVertices, fThreshold);
 
         piVoxelToVertexIndexMappingData = GenerateIndexMap(spBinaryROIMap, kSegmentBoundingBox);
-        cout << "Voxel to vertex index mapping data generated " << endl;
+        std::cout << "Voxel to vertex index mapping data generated " << std::endl;
 
         kSegmentDims = kSegmentBoundingBox.GetSize();
       }
       else
       {
-        cout << "using standard algorithm" << endl;
+        std::cout << "using standard algorithm" << std::endl;
         itk::ImageRegionConstIteratorWithIndex<MRImageType> imageIterator(spSegmentPropImage, spSegmentPropImage->GetLargestPossibleRegion());
 
         kSegmentBoundingBox = computeSegmentBoundingBox(imageIterator, iNumberOfVertices, fThreshold);
@@ -577,8 +576,8 @@ int GraphCutSegmentationImprover()
         kSegmentDims = kSegmentBoundingBox.GetSize();
         iNumberOfVertices = kSegmentDims[0] * kSegmentDims[1] * kSegmentDims[2];
       }
-      cout << "Segment bounding box : " << kSegmentBoundingBox << endl;
-      cout << "Number of vertices required : " << iNumberOfVertices << "+2" << endl;
+      std::cout << "Segment bounding box : " << kSegmentBoundingBox << std::endl;
+      std::cout << "Number of vertices required : " << iNumberOfVertices << "+2" << std::endl;
 
       // The graph initialized with some nodes
       Graph g(iNumberOfVertices + 2);
@@ -616,7 +615,7 @@ int GraphCutSegmentationImprover()
           for (std::vector<FloatImageType::Pointer>::iterator it = foregroundImgs.begin(); it != foregroundImgs.end(); ++it)
           {
             FloatImageType::Pointer foregroundImgs = *it;
-            fTissueForegroundProbability += max(0.001f, foregroundImgs->GetPixel(kIndex3D));
+            fTissueForegroundProbability += std::max(0.001f, foregroundImgs->GetPixel(kIndex3D));
           }
           if (foregroundImgs.size() > 0)
             fTissueForegroundProbability /= foregroundImgs.size();
@@ -625,13 +624,13 @@ int GraphCutSegmentationImprover()
           for (std::vector<FloatImageType::Pointer>::iterator it = backgroundImgs.begin(); it != backgroundImgs.end(); ++it)
           {
             FloatImageType::Pointer backgroundImgs = *it;
-            fTissueBackgroundProbability += max(0.001f, backgroundImgs->GetPixel(kIndex3D));
+            fTissueBackgroundProbability += std::max(0.001f, backgroundImgs->GetPixel(kIndex3D));
           }
           if (backgroundImgs.size() > 0)
             fTissueBackgroundProbability /= backgroundImgs.size();
 
-          float fSegmentForegroundProbability = max(0.001f, imageIterator.Get());
-          float fSegmentBackgroundProbability = max(0.001f, 1.0f - fSegmentForegroundProbability);
+          float fSegmentForegroundProbability = std::max(0.001f, imageIterator.Get());
+          float fSegmentBackgroundProbability = std::max(0.001f, 1.0f - fSegmentForegroundProbability);
 
           float fRegionBackground = -fAlpha * log(fTissueBackgroundProbability) - (1.0f - fAlpha) * log(fSegmentBackgroundProbability);
           float fRegionObject = -fAlpha * log(fTissueForegroundProbability) - (1.0f - fAlpha) * log(fSegmentForegroundProbability);
@@ -654,7 +653,7 @@ int GraphCutSegmentationImprover()
         } // loop
       }
 
-      cout << "Done setting up t-weights" << endl;
+      std::cout << "Done setting up t-weights" << std::endl;
 
       // Set up n-weights
       typedef itk::ConstShapedNeighborhoodIterator<MRImageType> IteratorType;
@@ -743,7 +742,7 @@ int GraphCutSegmentationImprover()
 
             float fContourPropabilityThere = spContourPropabilisticMap->GetPixel(kIndexThere3D);
 
-            // float fLargestContourPropability = max(fContourPropabilityHere, fContourPropabilityThere);
+            // float fLargestContourPropability = std::max(fContourPropabilityHere, fContourPropabilityThere);
             // float fEdgeTerm = 1.0f - fLargestContourPropability;
 
             float fAtoBEdgeTerm = 1.0f;
@@ -788,13 +787,13 @@ int GraphCutSegmentationImprover()
           }
         } // loop
 
-        // fK = max(fK, fKTemp);
+        // fK = std::max(fK, fKTemp);
       }
 
-      cout << "Done setting up n-weights" << endl;
+      std::cout << "Done setting up n-weights" << std::endl;
 
       EdgeWeightType flow = boykov_kolmogorov_max_flow(g, kSourceNode, kSinkNode);
-      cout << "Found a flow of: " << flow << " for segment " << iLabel << endl;
+      std::cout << "Found a flow of: " << flow << " for segment " << iLabel << std::endl;
       {
         itk::ImageRegionIteratorWithIndex<LabelImageType> imageIterator(spOutputImage, kSegmentBoundingBox);
 
@@ -854,7 +853,7 @@ int GraphCutSegmentationImprover()
   }
   catch (itk::ExceptionObject& exp)
   {
-    cout << exp << endl;
+    std::cout << exp << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -865,21 +864,21 @@ int main(int argc, char *argv[])
 {
   if (argc < 4)
   {
-    cout << "Usage: " << argv[0];
-    cout << " mrImage";
-    cout << " labelMapImage";
-    cout << " outputLabelMapImage";
-    cout << " [-a alpha] [-s sigma] [-l lambda] [-t threshold]";
-    cout << " [-n narrowBandProbabilityThreshold]";
-    cout << " [-I InsideValue] [-O OutsideValue]";
-    cout << " [-L LowerValue] [-U UpperValue]";
-    cout << " [-c graph_cut_clean_segmentID -p segmentProbabilityMapImage]";
-    cout << " [-f foregroundProbabilityMapImage]";
-    cout << " [-b backgroundProbabilityMapImage]";
-    cout << " [-G normalized gradient image/contourPropabilisticMap]";
-    cout << " [-N narrowband binary ROI/spBinaryROIMap (only output if narrowband is used)]";
-    cout << " [-V verboseOutput (0)/1]";
-    cout << endl;
+    std::cout << "Usage: " << argv[0];
+    std::cout << " mrImage";
+    std::cout << " labelMapImage";
+    std::cout << " outputLabelMapImage";
+    std::cout << " [-a alpha] [-s sigma] [-l lambda] [-t threshold]";
+    std::cout << " [-n narrowBandProbabilityThreshold]";
+    std::cout << " [-I InsideValue] [-O OutsideValue]";
+    std::cout << " [-L LowerValue] [-U UpperValue]";
+    std::cout << " [-c graph_cut_clean_segmentID -p segmentProbabilityMapImage]";
+    std::cout << " [-f foregroundProbabilityMapImage]";
+    std::cout << " [-b backgroundProbabilityMapImage]";
+    std::cout << " [-G normalized gradient image/contourPropabilisticMap]";
+    std::cout << " [-N narrowband binary ROI/spBinaryROIMap (only output if narrowband is used)]";
+    std::cout << " [-V verboseOutput (0)/1]";
+    std::cout << std::endl;
     if (argc >= 2 &&
         (std::string(argv[1]) == std::string("--help") ||
          std::string(argv[1]) == std::string("-h")))
