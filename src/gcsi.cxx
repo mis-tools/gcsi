@@ -79,7 +79,7 @@ FloatImageType::Pointer ComputeContourPropabilisticMap(MRImageType::Pointer spIn
   spGradientFilter->Update();
 
   FloatImageType::Pointer spNormalizedImage = NormalizeImage(spGradientFilter->GetOutput());
-  
+
   itk::ImageRegionIteratorWithIndex<FloatImageType> kIt(spNormalizedImage, spNormalizedImage->GetLargestPossibleRegion());
 
   while (!kIt.IsAtEnd())
