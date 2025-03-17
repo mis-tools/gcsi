@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+using namespace std;
 using namespace boost;
 
 typedef float FloatPixelType;
